@@ -153,7 +153,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_public_key
    
    **Keuntungan:**
    - ✅ Tidak perlu set build command manual
-   - ✅ Port sudah diatur (port 80)
+   - ✅ Port sudah diatur (port 3000)
    - ✅ Nginx sudah dikonfigurasi untuk SPA routing (React Router)
    - ✅ Optimized untuk production
    - ✅ Static files di-cache dengan benar
@@ -184,7 +184,8 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_public_key
 4. **Setup Port (jika diperlukan)**
    - Vite build menghasilkan static files di folder `dist`
    - Jika menggunakan `NIXPACKS_START_CMD`, set port di command (contoh: `-l 3000`)
-   - Jika menggunakan Dockerfile, port sudah di-set di Dockerfile (port 80)
+   - Jika menggunakan Dockerfile, port sudah di-set di Dockerfile (port 3000)
+   - **Catatan:** Pastikan port 3000 tidak digunakan oleh aplikasi lain di server
 
 5. **Deploy**
    - Klik "Deploy" atau "Save & Deploy"
