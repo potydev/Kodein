@@ -162,17 +162,13 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_public_key
 
 3. **Setup Environment Variables** ⚠️ **PENTING - WAJIB!**
    
-   📍 **Di mana?** Di tab **"Environment Variables"** di dashboard Dockploy, tambahkan environment variables berikut:
+   📍 **Di mana?** Di tab **"Environment Variables"** di dashboard Dokploy, tambahkan environment variables berikut:
    
    | Variable Name | Value | Keterangan |
    |--------------|-------|------------|
    | `VITE_SUPABASE_URL` | `https://your-project.supabase.co` | URL dari Supabase Dashboard |
    | `VITE_SUPABASE_PUBLISHABLE_KEY` | `eyJhbGc...` | Anon/Public Key dari Supabase |
-   
-   **⚠️ Penting untuk Dockerfile:**
-   - Environment variables ini **WAJIB** di-set karena Vite memerlukan env vars saat **build time**
-   - Dockploy akan otomatis meng-inject env vars ke Dockerfile saat build
-   - Tanpa env vars ini, build akan berhasil tapi aplikasi tidak bisa connect ke Supabase
+   | `VITE_SUPABASE_PROJECT_ID` | `your-project-id` | Project ID dari Supabase (opsional) |
    
    **Cara mendapatkan nilai:**
    - Buka [Supabase Dashboard](https://supabase.com/dashboard)
@@ -180,14 +176,35 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_public_key
    - Pergi ke **Settings** → **API**
    - Copy **Project URL** untuk `VITE_SUPABASE_URL`
    - Copy **anon public** key untuk `VITE_SUPABASE_PUBLISHABLE_KEY`
+   - Copy **Project ID** untuk `VITE_SUPABASE_PROJECT_ID` (jika diperlukan)
 
-4. **Setup Port (jika diperlukan)**
+4. **Setup Build-time Arguments** ⚠️ **PENTING - WAJIB UNTUK DOCKERFILE!**
+   
+   📍 **Di mana?** Di halaman konfigurasi aplikasi Dokploy, cari bagian **"Build-time Arguments"** atau **"Docker Build Args"**
+   
+   **⚠️ PENTING:** Dokploy **TIDAK otomatis** mengirim environment variables sebagai build arguments. Anda **WAJIB** mengisi manual!
+   
+   Tambahkan build arguments berikut (copy value dari Environment Variables yang sudah di-set di langkah 3):
+   
+   | Key | Value |
+   |-----|-------|
+   | `VITE_SUPABASE_URL` | (Copy value dari Environment Variables) |
+   | `VITE_SUPABASE_PUBLISHABLE_KEY` | (Copy value dari Environment Variables) |
+   | `VITE_SUPABASE_PROJECT_ID` | (Copy value dari Environment Variables, jika ada) |
+   
+   **📍 Catatan Penting:**
+   - Value harus **sama persis** dengan value di Environment Variables
+   - Copy-paste value dari Environment Variables ke Build-time Arguments
+   - Tanpa Build-time Arguments, Dockerfile tidak akan menerima env vars saat build
+   - Ini adalah penyebab utama error: `Missing Supabase environment variables`
+
+5. **Setup Port (jika diperlukan)**
    - Vite build menghasilkan static files di folder `dist`
    - Jika menggunakan `NIXPACKS_START_CMD`, set port di command (contoh: `-l 3000`)
    - Jika menggunakan Dockerfile, port sudah di-set di Dockerfile (port 3000)
    - **Catatan:** Pastikan port 3000 tidak digunakan oleh aplikasi lain di server
 
-5. **Deploy**
+6. **Deploy**
    - Klik "Deploy" atau "Save & Deploy"
    - Tunggu build process selesai
    - Aplikasi akan otomatis ter-deploy
@@ -201,12 +218,18 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_public_key
 
 #### Troubleshooting:
 
-- **Build gagal?** Pastikan Node.js version di Dockploy adalah 18+
-- **Environment variables tidak terbaca?** Pastikan nama variable dimulai dengan `VITE_` (karena ini Vite project)
-- **Aplikasi error saat runtime?** Cek console logs di Dockploy untuk melihat error message
-- **Layar putih setelah deploy?** ⚠️ **PALING UMUM!** 
+- **Build gagal?** Pastikan Node.js version di Dokploy adalah 18+
+- **Environment variables tidak terbaca?** 
+  - Pastikan nama variable dimulai dengan `VITE_` (karena ini Vite project)
+  - ⚠️ **PENTING:** Pastikan Build-time Arguments sudah diisi di Dokploy (lihat langkah 4)
+- **Aplikasi error: "Missing Supabase environment variables"?** ⚠️ **PALING UMUM!**
+  - Pastikan Build-time Arguments sudah diisi di Dokploy
+  - Pastikan value di Build-time Arguments sama dengan value di Environment Variables
+  - Rebuild aplikasi setelah mengisi Build-time Arguments
+- **Layar putih setelah deploy?** 
   - Ini biasanya karena environment variables tidak ter-set saat build time
-  - Pastikan `VITE_SUPABASE_URL` dan `VITE_SUPABASE_PUBLISHABLE_KEY` sudah di-set di Dockploy **SEBELUM** build
+  - Pastikan `VITE_SUPABASE_URL` dan `VITE_SUPABASE_PUBLISHABLE_KEY` sudah di-set di Environment Variables **DAN** Build-time Arguments
+  - Lihat file `TROUBLESHOOTING.md` untuk panduan lengkap
   - Setelah menambahkan env vars, **REBUILD** aplikasi
   - Buka browser console (F12) untuk melihat error message
   - Lihat [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) untuk panduan lengkap

@@ -69,38 +69,52 @@ Di Dockploy, buka **"Build Logs"** dan cari:
 - Tapi aplikasi masih error: `Missing Supabase environment variables`
 
 **Penyebab:**
-Dokploy mungkin tidak otomatis mengirim environment variables sebagai **build arguments** ke Dockerfile. Dockerfile memerlukan env vars sebagai build arguments (`--build-arg`) saat build.
+Dokploy **TIDAK otomatis** mengirim environment variables sebagai **build arguments** ke Dockerfile. Dockerfile memerlukan env vars sebagai build arguments (`--build-arg`) saat build, dan ini harus di-set manual di Dokploy.
 
-**Solusi:**
+**Solusi: ⭐ WAJIB DILAKUKAN!**
 
-1. **Pastikan Dokploy Mengirim Env Vars sebagai Build Arguments**
-   
-   Di Dokploy, cek apakah ada opsi untuk mengirim env vars sebagai build arguments. Beberapa platform deployment memerlukan konfigurasi khusus:
-   
-   - Cari opsi **"Build Arguments"** atau **"Docker Build Args"** di halaman konfigurasi
-   - Atau pastikan Dokploy otomatis mengirim semua env vars yang dimulai dengan `VITE_` sebagai build args
-   
-2. **Cek Build Logs untuk Build Arguments**
-   
-   Di build logs Dokploy, cari baris yang menunjukkan build command:
-   ```
-   docker build --build-arg VITE_SUPABASE_URL=... --build-arg VITE_SUPABASE_PUBLISHABLE_KEY=...
-   ```
-   
-   Jika tidak ada `--build-arg` untuk env vars, berarti Dokploy tidak mengirim sebagai build args.
+#### Langkah 1: Isi Build-time Arguments di Dokploy
 
-3. **Alternatif: Konfigurasi Manual Build Arguments (jika Dokploy support)**
-   
-   Jika Dokploy memiliki opsi untuk set build arguments manual, tambahkan:
-   - `VITE_SUPABASE_URL` = (value dari env vars)
-   - `VITE_SUPABASE_PUBLISHABLE_KEY` = (value dari env vars)
-   - `VITE_SUPABASE_PROJECT_ID` = (value dari env vars)
+1. **Buka halaman aplikasi di Dokploy**
+2. **Cari bagian "Build-time Arguments"** (biasanya di tab konfigurasi atau build settings)
+3. **Tambahkan build arguments berikut:**
 
-4. **Kontak Support Dokploy**
-   
-   Jika Dokploy tidak otomatis mengirim env vars sebagai build args, kontak support Dokploy untuk:
-   - Memastikan env vars yang dimulai dengan `VITE_` otomatis dikirim sebagai build args
-   - Atau minta panduan cara mengirim build args manual
+   | Key | Value |
+   |-----|-------|
+   | `VITE_SUPABASE_URL` | (Copy value dari Environment Variables) |
+   | `VITE_SUPABASE_PUBLISHABLE_KEY` | (Copy value dari Environment Variables) |
+   | `VITE_SUPABASE_PROJECT_ID` | (Copy value dari Environment Variables) |
+
+   **📍 Catatan Penting:**
+   - Value harus **sama persis** dengan value di Environment Variables
+   - Copy-paste value dari Environment Variables ke Build-time Arguments
+   - Pastikan tidak ada spasi atau karakter tambahan
+
+4. **Simpan konfigurasi**
+
+#### Langkah 2: Rebuild Aplikasi
+
+Setelah mengisi Build-time Arguments:
+1. Klik **"Rebuild"** atau **"Redeploy"** di Dokploy
+2. Tunggu build process selesai
+3. Cek build logs untuk memastikan build arguments ter-inject
+
+#### Langkah 3: Verifikasi di Build Logs
+
+Di build logs Dokploy, cari baris yang menunjukkan build command:
+```
+docker build --build-arg VITE_SUPABASE_URL=... --build-arg VITE_SUPABASE_PUBLISHABLE_KEY=...
+```
+
+Jika ada `--build-arg` untuk env vars, berarti sudah benar!
+
+#### Langkah 4: Verifikasi di Browser
+
+Setelah rebuild selesai:
+1. Buka aplikasi di browser
+2. Tekan F12 untuk buka Developer Tools
+3. Cek tab **Console**
+4. Jika error `Missing Supabase environment variables` hilang, berarti sudah berhasil! ✅
 
 ### Jika Masih Tidak Jalan
 
