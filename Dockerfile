@@ -16,6 +16,13 @@ COPY . .
 # Build aplikasi
 # Environment variables (VITE_*) akan otomatis di-inject oleh Dockploy saat build
 # Vite akan otomatis membaca env vars yang dimulai dengan VITE_ dari environment
+# Pastikan VITE_SUPABASE_URL dan VITE_SUPABASE_PUBLISHABLE_KEY sudah di-set di Dockploy
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_PUBLISHABLE_KEY
+
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
+
 RUN npm run build
 
 # Production stage

@@ -204,6 +204,12 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_public_key
 - **Build gagal?** Pastikan Node.js version di Dockploy adalah 18+
 - **Environment variables tidak terbaca?** Pastikan nama variable dimulai dengan `VITE_` (karena ini Vite project)
 - **Aplikasi error saat runtime?** Cek console logs di Dockploy untuk melihat error message
+- **Layar putih setelah deploy?** ⚠️ **PALING UMUM!** 
+  - Ini biasanya karena environment variables tidak ter-set saat build time
+  - Pastikan `VITE_SUPABASE_URL` dan `VITE_SUPABASE_PUBLISHABLE_KEY` sudah di-set di Dockploy **SEBELUM** build
+  - Setelah menambahkan env vars, **REBUILD** aplikasi
+  - Buka browser console (F12) untuk melihat error message
+  - Lihat [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) untuk panduan lengkap
 
 ## 🎯 Fitur Detail
 
