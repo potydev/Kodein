@@ -14,14 +14,17 @@ RUN npm ci
 COPY . .
 
 # Build aplikasi
-# Environment variables (VITE_*) akan otomatis di-inject oleh Dockploy saat build
-# Vite akan otomatis membaca env vars yang dimulai dengan VITE_ dari environment
-# Pastikan VITE_SUPABASE_URL dan VITE_SUPABASE_PUBLISHABLE_KEY sudah di-set di Dockploy
+# Environment variables (VITE_*) harus di-inject sebagai build arguments oleh Dokploy
+# Pastikan Dokploy mengirim env vars sebagai build args dengan format: --build-arg KEY=VALUE
+# Atau pastikan Dokploy sudah mengkonfigurasi untuk otomatis mengirim env vars sebagai build args
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_PUBLISHABLE_KEY
+ARG VITE_SUPABASE_PROJECT_ID
 
-ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
-ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
+# Set ENV dari ARG agar tersedia saat build
+ENV VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+ENV VITE_SUPABASE_PUBLISHABLE_KEY=${VITE_SUPABASE_PUBLISHABLE_KEY}
+ENV VITE_SUPABASE_PROJECT_ID=${VITE_SUPABASE_PROJECT_ID}
 
 RUN npm run build
 

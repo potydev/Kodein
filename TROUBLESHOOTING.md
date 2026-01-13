@@ -61,6 +61,47 @@ Di Dockploy, buka **"Build Logs"** dan cari:
 - `Missing Supabase environment variables` → env vars tidak ter-set
 - `VITE_SUPABASE_URL is undefined` → env vars tidak ter-inject
 
+### ⚠️ Masalah: Environment Variables Tidak Ter-Inject Meskipun Sudah Di-Set
+
+**Gejala:**
+- Environment variables sudah di-set di Dokploy
+- Build berhasil tanpa error
+- Tapi aplikasi masih error: `Missing Supabase environment variables`
+
+**Penyebab:**
+Dokploy mungkin tidak otomatis mengirim environment variables sebagai **build arguments** ke Dockerfile. Dockerfile memerlukan env vars sebagai build arguments (`--build-arg`) saat build.
+
+**Solusi:**
+
+1. **Pastikan Dokploy Mengirim Env Vars sebagai Build Arguments**
+   
+   Di Dokploy, cek apakah ada opsi untuk mengirim env vars sebagai build arguments. Beberapa platform deployment memerlukan konfigurasi khusus:
+   
+   - Cari opsi **"Build Arguments"** atau **"Docker Build Args"** di halaman konfigurasi
+   - Atau pastikan Dokploy otomatis mengirim semua env vars yang dimulai dengan `VITE_` sebagai build args
+   
+2. **Cek Build Logs untuk Build Arguments**
+   
+   Di build logs Dokploy, cari baris yang menunjukkan build command:
+   ```
+   docker build --build-arg VITE_SUPABASE_URL=... --build-arg VITE_SUPABASE_PUBLISHABLE_KEY=...
+   ```
+   
+   Jika tidak ada `--build-arg` untuk env vars, berarti Dokploy tidak mengirim sebagai build args.
+
+3. **Alternatif: Konfigurasi Manual Build Arguments (jika Dokploy support)**
+   
+   Jika Dokploy memiliki opsi untuk set build arguments manual, tambahkan:
+   - `VITE_SUPABASE_URL` = (value dari env vars)
+   - `VITE_SUPABASE_PUBLISHABLE_KEY` = (value dari env vars)
+   - `VITE_SUPABASE_PROJECT_ID` = (value dari env vars)
+
+4. **Kontak Support Dokploy**
+   
+   Jika Dokploy tidak otomatis mengirim env vars sebagai build args, kontak support Dokploy untuk:
+   - Memastikan env vars yang dimulai dengan `VITE_` otomatis dikirim sebagai build args
+   - Atau minta panduan cara mengirim build args manual
+
 ### Jika Masih Tidak Jalan
 
 1. **Cek Browser Console (F12)**
