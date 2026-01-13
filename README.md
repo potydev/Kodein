@@ -117,122 +117,40 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_public_key
 
 ## 🚀 Deployment
 
-### Deploy ke Dockploy
+Aplikasi ini menggunakan Vite yang memerlukan environment variables saat **build time**. Untuk deployment:
 
-**Ya, aplikasi bisa jalan di Dockploy meskipun `.env` tidak ada di GitHub!** Dockploy memungkinkan Anda menambahkan environment variables melalui dashboard mereka.
+### Build untuk Production
 
-#### Langkah-langkah Deployment:
+```bash
+npm run build
+```
 
-1. **Connect Repository ke Dockploy**
-   - Login ke [Dockploy](https://dockploy.com)
-   - Buat aplikasi baru (klik **"New Application"** atau **"Create Service"**)
-   - Connect ke repository GitHub: `potydev/Kodein`
-   - Pilih branch: `main`
+Build akan menghasilkan folder `dist` yang berisi static files siap deploy.
 
-2. **Setup Build Configuration**
-   
-   **📍 Lokasi:** Setelah connect repository, Anda akan melihat form konfigurasi aplikasi. Cari tab **"Environment Variables"** atau **"Build Settings"**.
-   
-   **Opsi A: Menggunakan Environment Variables (Nixpacks/Railpack - Default)**
-   
-   📍 **Di mana?** Buka tab **"Environment Variables"** di halaman konfigurasi aplikasi, lalu tambahkan:
-   
-   | Variable Name | Value | Keterangan |
-   |--------------|-------|------------|
-   | `NIXPACKS_BUILD_CMD` | `npm run build` | Command untuk build aplikasi |
-   | `NIXPACKS_START_CMD` | `npx serve -s dist -l 3000` | Command untuk start aplikasi (serve static files) |
-   | `NIXPACKS_INSTALL_CMD` | `npm install` | Command untuk install dependencies (biasanya otomatis) |
-   
-   **Catatan:** Jika `serve` tidak tersedia, gunakan alternatif:
-   - `npx http-server dist -p 3000 -a 0.0.0.0`
-   - Atau install dulu: `npm install -g serve` lalu `serve -s dist -l 3000`
-   
-   **Opsi B: Menggunakan Dockerfile** ⭐ **REKOMENDASI**
-   
-   📍 **Di mana?** Di halaman konfigurasi aplikasi, cari opsi **"Build Type"** atau **"Build Method"**, pilih **"Dockerfile"**
-   
-   **Keuntungan:**
-   - ✅ Tidak perlu set build command manual
-   - ✅ Port sudah diatur (port 3000)
-   - ✅ Nginx sudah dikonfigurasi untuk SPA routing (React Router)
-   - ✅ Optimized untuk production
-   - ✅ Static files di-cache dengan benar
-   
-   **Catatan:** Environment variables tetap perlu di-set (lihat langkah 3) karena Vite memerlukan env vars saat **build time**.
+### Environment Variables untuk Production
 
-3. **Setup Environment Variables** ⚠️ **PENTING - WAJIB!**
-   
-   📍 **Di mana?** Di tab **"Environment Variables"** di dashboard Dokploy, tambahkan environment variables berikut:
-   
-   | Variable Name | Value | Keterangan |
-   |--------------|-------|------------|
-   | `VITE_SUPABASE_URL` | `https://your-project.supabase.co` | URL dari Supabase Dashboard |
-   | `VITE_SUPABASE_PUBLISHABLE_KEY` | `eyJhbGc...` | Anon/Public Key dari Supabase |
-   | `VITE_SUPABASE_PROJECT_ID` | `your-project-id` | Project ID dari Supabase (opsional) |
-   
-   **Cara mendapatkan nilai:**
-   - Buka [Supabase Dashboard](https://supabase.com/dashboard)
-   - Pilih project Anda
-   - Pergi ke **Settings** → **API**
-   - Copy **Project URL** untuk `VITE_SUPABASE_URL`
-   - Copy **anon public** key untuk `VITE_SUPABASE_PUBLISHABLE_KEY`
-   - Copy **Project ID** untuk `VITE_SUPABASE_PROJECT_ID` (jika diperlukan)
+Pastikan environment variables berikut tersedia saat build:
+- `VITE_SUPABASE_URL` - URL Supabase project
+- `VITE_SUPABASE_PUBLISHABLE_KEY` - Anon/Public key dari Supabase
 
-4. **Setup Build-time Arguments** ⚠️ **PENTING - WAJIB UNTUK DOCKERFILE!**
-   
-   📍 **Di mana?** Di halaman konfigurasi aplikasi Dokploy, cari bagian **"Build-time Arguments"** atau **"Docker Build Args"**
-   
-   **⚠️ PENTING:** Dokploy **TIDAK otomatis** mengirim environment variables sebagai build arguments. Anda **WAJIB** mengisi manual!
-   
-   Tambahkan build arguments berikut (copy value dari Environment Variables yang sudah di-set di langkah 3):
-   
-   | Key | Value |
-   |-----|-------|
-   | `VITE_SUPABASE_URL` | (Copy value dari Environment Variables) |
-   | `VITE_SUPABASE_PUBLISHABLE_KEY` | (Copy value dari Environment Variables) |
-   | `VITE_SUPABASE_PROJECT_ID` | (Copy value dari Environment Variables, jika ada) |
-   
-   **📍 Catatan Penting:**
-   - Value harus **sama persis** dengan value di Environment Variables
-   - Copy-paste value dari Environment Variables ke Build-time Arguments
-   - Tanpa Build-time Arguments, Dockerfile tidak akan menerima env vars saat build
-   - Ini adalah penyebab utama error: `Missing Supabase environment variables`
+**Catatan Penting:**
+- Vite memerlukan env vars yang dimulai dengan `VITE_` saat build time
+- Jika menggunakan Dockerfile, pastikan env vars dikirim sebagai build arguments
+- Jika menggunakan platform deployment (seperti Dokploy), pastikan Build-time Arguments diisi manual karena tidak otomatis ter-inject
 
-5. **Setup Port (jika diperlukan)**
-   - Vite build menghasilkan static files di folder `dist`
-   - Jika menggunakan `NIXPACKS_START_CMD`, set port di command (contoh: `-l 3000`)
-   - Jika menggunakan Dockerfile, port sudah di-set di Dockerfile (port 3000)
-   - **Catatan:** Pastikan port 3000 tidak digunakan oleh aplikasi lain di server
+### Deployment dengan Docker
 
-6. **Deploy**
-   - Klik "Deploy" atau "Save & Deploy"
-   - Tunggu build process selesai
-   - Aplikasi akan otomatis ter-deploy
+Aplikasi sudah menyediakan `Dockerfile` untuk deployment dengan Docker. Dockerfile menggunakan multi-stage build dengan Nginx untuk serve static files.
 
-#### Catatan Penting:
+**Catatan:** Pastikan environment variables dikirim sebagai build arguments saat build Docker image.
 
-- ✅ **Environment variables di Dockploy aman** - tidak akan ter-expose di repository
-- ✅ **File `.env` tidak perlu di-commit** - ini adalah praktik yang benar
-- ✅ **Setiap perubahan environment variables** memerlukan re-deploy aplikasi
-- ⚠️ **Jangan pernah commit file `.env`** yang berisi credentials asli ke GitHub
+### Troubleshooting
 
-#### Troubleshooting:
+Jika mengalami masalah deployment, lihat file [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) untuk panduan lengkap.
 
-- **Build gagal?** Pastikan Node.js version di Dokploy adalah 18+
-- **Environment variables tidak terbaca?** 
-  - Pastikan nama variable dimulai dengan `VITE_` (karena ini Vite project)
-  - ⚠️ **PENTING:** Pastikan Build-time Arguments sudah diisi di Dokploy (lihat langkah 4)
-- **Aplikasi error: "Missing Supabase environment variables"?** ⚠️ **PALING UMUM!**
-  - Pastikan Build-time Arguments sudah diisi di Dokploy
-  - Pastikan value di Build-time Arguments sama dengan value di Environment Variables
-  - Rebuild aplikasi setelah mengisi Build-time Arguments
-- **Layar putih setelah deploy?** 
-  - Ini biasanya karena environment variables tidak ter-set saat build time
-  - Pastikan `VITE_SUPABASE_URL` dan `VITE_SUPABASE_PUBLISHABLE_KEY` sudah di-set di Environment Variables **DAN** Build-time Arguments
-  - Lihat file `TROUBLESHOOTING.md` untuk panduan lengkap
-  - Setelah menambahkan env vars, **REBUILD** aplikasi
-  - Buka browser console (F12) untuk melihat error message
-  - Lihat [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) untuk panduan lengkap
+**Masalah umum:**
+- **Layar putih setelah deploy** → Biasanya karena environment variables tidak ter-set saat build time
+- **Error: "Missing Supabase environment variables"** → Pastikan Build-time Arguments sudah diisi (jika menggunakan Dockerfile)
 
 ## 🎯 Fitur Detail
 
